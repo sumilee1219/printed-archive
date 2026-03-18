@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weighted Words</title>
+  <link href="https://db.onlinewebfonts.com/c/0000f72cb89d7fa508eac49a3c93c421?family=Hydrophilia+Liquid" rel="stylesheet" type="text/css"/>
+  <link rel="stylesheet" href="https://use.typekit.net/mau8ddc.css">
+  <style>
+    @font-face {
+      font-family: 'HsGultokki';
+      src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2210-2@1.0/HSGooltokki.woff2') format('woff2');
+      font-weight: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: "Maison Neue Mono";
+      src: url("https://db.onlinewebfonts.com/t/63467b9cbd4a4d7eafb5e64946ecaa18.woff2") format("woff2"),
+           url("https://db.onlinewebfonts.com/t/63467b9cbd4a4d7eafb5e64946ecaa18.woff") format("woff"),
+           url("https://db.onlinewebfonts.com/t/63467b9cbd4a4d7eafb5e64946ecaa18.ttf") format("truetype");
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --white: #FFFEFC;
+      --blue: #1B223D;
+      --text-muted: #32395a;
+      --border-color: #333333;
+      --card-bg: #FFFEF2;
+    }
+
+    body {
+      font-family: 'Hydrophilia Liquid', sans-serif;
+      background: var(--blue);
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      z-index: 100;
+      padding: 28px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.3s, background 0.3s;
+    }
+
+    header.scrolled {
+      border-color: var(--border-color);
+      background: rgba(27, 34, 61, 0.95);
+      backdrop-filter: blur(8px);
+    }
+
+    .site-title {
+      font-family: "hydrophilia-liquid", sans-serif;
+      font-weight: 400;
+      font-size: 1.4rem;
+      color: var(--white);
+      letter-spacing: 0.02em;
+      text-decoration: none;
+    }
+
+    .header-meta {
+      font-family: "Maison Neue Mono", monospace;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 160px 40px 80px;
+      max-width: 900px;
+    }
+
+    .hero-title {
+      font-family: "hydrophilia-liquid", sans-serif;
+      font-weight: 400;
+      font-size: clamp(3rem, 8vw, 6rem);
+      color: var(--white);
+      line-height: 1.05;
+      margin-bottom: 24px;
+    }
+
+    .hero-sub {
+      font-family: "Maison Neue Mono", monospace;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+      line-height: 1.7;
+      max-width: 400px;
+    }
+
+    /* ── FILTER BAR ── */
+    .filter-bar {
+      padding: 0 40px 48px;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .filter-label {
+      font-family: "Maison Neue Mono", monospace;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-right: 10px;
+    }
+
+    .filter-btn {
+      font-family: "Maison Neue Mono", monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+      background: var(--white);
+      color: var(--blue);
+      border-color: var(--white);
+    }
+
+    .filter-btn.disabled {
+      opacity: 0.25;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    /* ── DIVIDER ── */
+    .section-divider {
+      padding: 0 40px;
+      margin-bottom: 48px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .divider-label {
+      font-family: "Maison Neue Mono", monospace;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .divider-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border-color);
+    }
+
+    .divider-count {
+      font-family: "Maison Neue Mono", monospace;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+    }
+
+    /* ── GRID ── */
+    .grid-section {
+      padding: 0 40px 100px;
+    }
+
+    .image-grid {
+      columns: 3;
+      column-gap: 2px;
+    }
+
+    .grid-item {
+      position: relative;
+      cursor: pointer;
+      break-inside: avoid;
+      margin-bottom: 2px;
+    }
+
+    .grid-item img {
+      display: block;
+      width: 100%;
+      height: auto;
+      transition: opacity 0.3s ease;
+      opacity: 0.9;
+    }
+
+    .grid-item:hover img {
+      opacity: 1;
+    }
+
+    .grid-item.hidden {
+      display: none;
+    }
+
+    /* ── LIGHTBOX ── */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 25, 0.97);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .lightbox.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    .lightbox-inner {
+      position: relative;
+      max-width: 1100px;
+      width: 100%;
+      display: flex;
+      gap: 40px;
+      align-items: center;
+    }
+
+    .lightbox-img-wrap {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .lightbox-img-wrap img {
+      max-width: 100%;
+      max-height: 80vh;
+      object-fit: contain;
+      display: block;
+    }
+
+    .lightbox-info {
+      width: 220px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .lightbox-index {
+      font-family: "Maison Neue Mono", monospace;
+      font-size: 2rem;
+      color: var(--white);
+      letter-spacing: 0.04em;
+    }
+
+    .lightbox-caption {
+      font-family: "hydrophilia-liquid", sans-serif;
+      font-size: 1.1rem;
+      color: var(--white);
+      line-height: 1.5;
+    }
+
+    .lightbox-meta {
+      font-family: "Maison Neue Mono", monospace;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.8;
+      letter-spacing: 0.04em;
+    }
+
+    .lightbox-meta span { display: block; }
+
+    .lightbox-nav {
+      display: flex;
+      gap: 10px;
+      margin-top: auto;
+    }
+
+    .lb-btn {
+      font-family: "Maison Neue Mono", monospace;
+      font-size: 0.8rem;
+      padding: 10px 18px;
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.05em;
+    }
+
+    .lb-btn:hover {
+      background: var(--white);
+      color: var(--blue);
+      border-color: var(--white);
+    }
+
+    .lb-close {
+      position: absolute;
+      top: -10px;
+      right: 0;
+      font-family: "Maison Neue Mono", monospace;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+      padding: 8px 0;
+    }
+
+    .lb-close:hover { color: var(--white); }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 32px 40px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-text {
+      font-family: "Maison Neue Mono", monospace;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      header { padding: 20px 24px; }
+      .hero { padding: 120px 24px 60px; }
+      .filter-bar { padding: 0 24px 36px; }
+      .grid-section { padding: 0 24px 80px; }
+      .section-divider { padding: 0 24px; }
+      .image-grid { columns: 2; }
+      footer { padding: 24px; }
+    }
+
+    @media (max-width: 600px) {
+      .image-grid { columns: 2; }
+      .lightbox-inner { flex-direction: column; gap: 20px; }
+      .lightbox-info { width: 100%; flex-direction: row; flex-wrap: wrap; gap: 12px; }
+      .lightbox-index { font-size: 1.4rem; }
+      .lightbox-nav { margin-top: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header id="site-header">
+    <a href="#" class="site-title">Weighted Words</a>
+    <span class="header-meta">Archive</span>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <h1 class="hero-title">Weighted<br>Words</h1>
+    <p class="hero-sub">An archive of images.<br>Each one carrying its own weight.</p>
+  </section>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar">
+    <span class="filter-label">edition —</span>
+    <button class="filter-btn active" data-filter="1">1</button>
+    <button class="filter-btn disabled" disabled>2</button>
+    <button class="filter-btn disabled" disabled>3</button>
+    <button class="filter-btn disabled" disabled>4</button>
+    <button class="filter-btn disabled" disabled>5</button>
+  </div>
+
+  <!-- DIVIDER -->
+  <div class="section-divider">
+    <span class="divider-label">Images</span>
+    <div class="divider-line"></div>
+    <span class="divider-count" id="image-count">12</span>
+  </div>
+
+  <!-- GRID -->
+  <!-- TO ADD YOUR IMAGES: replace src="..." in each block below with your Supabase URL -->
+  <section class="grid-section">
+    <div class="image-grid" id="image-grid">
+
+      <div class="grid-item" data-edition="1" data-caption="Still Life, No. 1" data-meta="Edition 1">
+        <img src="https://images.unsplash.com/photo-1504700610630-ac6aba3536d3?w=600&q=80" alt="">
+      </div>
+
+      <div class="grid-item" data-edition="1" data-caption="Light Study I" data-meta="Edition 1">
+        <img src="https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=600&q=80" alt="">
+      </div>
+
+      <div class="grid-item" data-edition="1" data-caption="Unnamed, March" data-meta="Edition 1">
+        <img src="https://images.unsplash.com/photo-1465101046530-73398c7f28ca?w=600&q=80" alt="">
+      </div>
+
+      <div class="grid-item" data-edition="1" data-caption="Window, Evening" data-meta="Edition 1">
+        <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80" alt="">
+      </div>
+
+      <div class="grid-item" data-edition="1" data-caption="Traces" data-meta="Edition 1">
+        <img src="https://images.unsplash.com/photo-1519681393784-d120267933ba?w=600&q=80" alt="">
+      </div>
+
+      <div class="grid-item" data-edition="1" data-caption="Interior II" data-meta="Edition 1">
+        <img src="https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=600&q=80" alt="">
+      </div>
+
+      <div class="grid-item" data-edition="1" data-caption="Untitled, August" data-meta="Edition 1">
+        <img src="https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=600&q=80" alt="">
+      </div>
+
+      <div class="grid-item" data-edition="1" data-caption="Quiet Hours" data-meta="Edition 1">
+        <img src="https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?w=600&q=80" alt="">
+      </div>
+
+      <div class="grid-item" data-edition="1" data-caption="After Rain" data-meta="Edition 1">
+        <img src="https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=600&q=80" alt="">
+      </div>
+
+      <div class="grid-item" data-edition="1" data-caption="Study in Blue" data-meta="Edition 1">
+        <img src="https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=600&q=80" alt="">
+      </div>
+
+      <div class="grid-item" data-edition="1" data-caption="Threshold" data-meta="Edition 1">
+        <img src="https://images.unsplash.com/photo-1523712999610-f77fbcfc3843?w=600&q=80" alt="">
+      </div>
+
+      <div class="grid-item" data-edition="1" data-caption="Ending, No. 3" data-meta="Edition 1">
+        <img src="https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?w=600&q=80" alt="">
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <span class="footer-text">Weighted Words</span>
+    <span class="footer-text" id="footer-year"></span>
+  </footer>
+
+  <!-- LIGHTBOX -->
+  <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+    <div class="lightbox-inner">
+      <button class="lb-close" onclick="closeLightbox()">close ×</button>
+      <div class="lightbox-img-wrap">
+        <img id="lb-img" src="" alt="">
+      </div>
+      <div class="lightbox-info">
+        <div class="lightbox-index" id="lb-index">#001</div>
+        <div class="lightbox-caption" id="lb-caption"></div>
+        <div class="lightbox-meta" id="lb-meta"></div>
+        <div class="lightbox-nav">
+          <button class="lb-btn" onclick="lbNav(-1)">← prev</button>
+          <button class="lb-btn" onclick="lbNav(1)">next →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ── HEADER SCROLL ──
+    const header = document.getElementById('site-header');
+    window.addEventListener('scroll', () => {
+      header.classList.toggle('scrolled', window.scrollY > 40);
+    });
+
+    // ── FOOTER YEAR ──
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+
+    // ── FILTER ──
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const gridItems  = document.querySelectorAll('.grid-item');
+    const countEl    = document.getElementById('image-count');
+
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const f = btn.dataset.filter;
+        let visible = 0;
+        gridItems.forEach(item => {
+          const show = f === 'all' || item.dataset.edition === f;
+          item.classList.toggle('hidden', !show);
+          if (show) visible++;
+        });
+        countEl.textContent = visible;
+      });
+    });
+
+    // ── LIGHTBOX ──
+    let currentIndex = 0;
+    let visibleItems = [];
+
+    function getVisibleItems() {
+      return Array.from(gridItems).filter(i => !i.classList.contains('hidden'));
+    }
+
+    gridItems.forEach(item => {
+      item.addEventListener('click', () => {
+        visibleItems = getVisibleItems();
+        currentIndex = visibleItems.indexOf(item);
+        openLightbox(currentIndex);
+      });
+    });
+
+    function openLightbox(idx) {
+      visibleItems = getVisibleItems();
+      currentIndex = idx;
+      const item = visibleItems[idx];
+      if (!item) return;
+
+      const img     = item.querySelector('img');
+      const caption = item.dataset.caption || '';
+      const meta    = item.dataset.meta || '';
+      const num     = String(idx + 1).padStart(3, '0');
+
+      document.getElementById('lb-img').src = img.src;
+      document.getElementById('lb-img').alt = img.alt;
+      document.getElementById('lb-caption').textContent = caption;
+      document.getElementById('lb-meta').innerHTML =
+        meta.split('·').map(s => `<span>${s.trim()}</span>`).join('');
+      document.getElementById('lb-index').textContent = `#${num}`;
+
+      document.getElementById('lightbox').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox(e) {
+      if (e && e.target !== document.getElementById('lightbox') && !e.target.classList.contains('lb-close')) return;
+      document.getElementById('lightbox').classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    function lbNav(dir) {
+      visibleItems = getVisibleItems();
+      currentIndex = (currentIndex + dir + visibleItems.length) % visibleItems.length;
+      openLightbox(currentIndex);
+    }
+
+    document.addEventListener('keydown', e => {
+      if (!document.getElementById('lightbox').classList.contains('active')) return;
+      if (e.key === 'Escape') { document.getElementById('lightbox').classList.remove('active'); document.body.style.overflow = ''; }
+      if (e.key === 'ArrowLeft')  lbNav(-1);
+      if (e.key === 'ArrowRight') lbNav(1);
+    });
+  </script>
+</body>
+</html>
